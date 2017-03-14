@@ -3,7 +3,7 @@ MAINTAINER QEdu IT TEAM
 
 # Ignore APT warnings about not having a TTY
 ENV DEBIAN_FRONTEND noninteractive
-
+ 
 RUN apt-get update \
   && apt-get upgrade -yq \
   && apt-get -yq install \
@@ -40,6 +40,27 @@ RUN  apt-get update -qq \
   && apt-get install -y -qq \
       autoconf \
       imagemagick \
+      libbz2-dev \
+      libevent-dev \
+      libglib2.0-dev \
+      libjpeg-dev \
+      libmagickcore-dev \
+      libmagickwand-dev \
+      libncurses-dev \
+      libcurl4-openssl-dev \
+      libffi-dev \
+      libgdbm-dev \
+      libpq-dev \
+      libreadline-dev libreadline6-dev \
+      libssl-dev \
+      libtool \
+      libxml2-dev \
+      libxslt-dev \
+      libyaml-dev \
+      software-properties-common \
+      zlib1g-dev \
+      mongodb \
+  && docker-php-ext-install zip \
   && apt-get clean -qq \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
