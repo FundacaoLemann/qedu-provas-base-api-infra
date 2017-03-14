@@ -40,7 +40,6 @@ RUN  apt-get update -qq \
   && apt-get install -y -qq \
       autoconf \
       imagemagick \
-      mongodb \
   && apt-get clean -qq \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -78,3 +77,7 @@ RUN cd $HOME/tmp &&\
     curl -s https://getcomposer.org/installer | php &&\
     mv composer.phar /usr/local/bin/composer &&\
     rm -fr tmp
+
+RUN pecl install mongodb
+
+RUN echo "extension=mongodb.so" >> /usr/local/etc/php/conf.d/mongodb.ini
