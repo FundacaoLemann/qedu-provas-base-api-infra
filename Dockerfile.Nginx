@@ -1,0 +1,4 @@
+FROM nginx:latest
+MAINTAINER QEdu IT TEAM
+
+COPY qedu-provas.conf /etc/nginx/conf.d/default.conf
