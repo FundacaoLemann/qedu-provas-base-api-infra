@@ -93,12 +93,17 @@ RUN apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 573BFD6B3D8FBC64107
 						gettext-base \
 	&& rm -rf /var/lib/apt/lists/*
 
+RUN useradd --home /home/qedu -m -U -s /bin/bash qedu
+
+RUN echo 'Defaults !requiretty' >> /etc/sudoers; \
+    echo 'qedu ALL= NOPASSWD: /usr/sbin/dpkg-reconfigure -f noninteractive tzdata, /usr/bin/tee /etc/timezone' >> /etc/sudoers;
+
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log
 
 RUN mkdir -p /var/log/supervisor 
-RUN mkdir -p /home/www-data
+RUN mkdir -p /home/qedu
 RUN mkdir -p /var/www
 
 ADD supervisord.conf /etc/supervisor/conf.d
@@ -106,21 +111,21 @@ ADD nginx.conf /etc/nginx
 ADD php-fpm.conf /usr/local/etc/
 
 RUN touch /var/run/nginx.pid && \
-    chown -R www-data\:www-data /var/www && \
-    chown -R www-data\:www-data /usr/local && \
-    chown -R www-data\:www-data /home/www-data && \
-    chown -R www-data\:www-data /etc/nginx/conf.d && \
-    chown -R www-data\:www-data /etc/nginx/nginx.conf && \
-    chown -R www-data\:www-data /var/log/supervisor && \
-    chown -R www-data\:www-data /var/run/nginx.pid && \
-    chown -R www-data\:www-data /var/cache/nginx/ && \
-    chown -R www-data:www-data /var/log/nginx && \
+    chown -R qedu:qedu /var/www && \
+    chown -R qedu:qedu /usr/local && \
+    chown -R qedu:qedu /home/qedu && \
+    chown -R qedu:qedu /etc/nginx/conf.d && \
+    chown -R qedu:qedu /etc/nginx/nginx.conf && \
+    chown -R qedu:qedu /var/log/supervisor && \
+    chown -R qedu:qedu /var/run/nginx.pid && \
+    chown -R qedu:qedu /var/cache/nginx/ && \
+    chown -R qedu:qedu /var/log/nginx && \
     chmod -R 755 /var/log/nginx && \
     chmod 644 /etc/nginx/*
 
-USER www-data
+USER qedu
 
-ENV HOME /home/www-data
+ENV HOME /home/qedu
 
 RUN cd $HOME && mkdir -p $HOME/tmp
 
@@ -135,5 +140,3 @@ RUN cd $HOME/tmp &&\
 RUN pecl install mongodb
 
 RUN echo "extension=mongodb.so" >> /usr/local/etc/php/conf.d/mongodb.ini
-
-ENTRYPOINT /usr/bin/supervisord
