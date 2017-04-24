@@ -3,7 +3,7 @@ MAINTAINER QEdu IT TEAM
 
 # Ignore APT warnings about not having a TTY
 ENV DEBIAN_FRONTEND noninteractive
- 
+
 RUN apt-get update \
   && apt-get upgrade -yq \
   && apt-get -yq install \
@@ -78,7 +78,7 @@ RUN set -xe \
     && apt-get update && apt-get install -y $buildDeps --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 
-ENV NGINX_VERSION 1.10.3-1~jessie
+ENV NGINX_VERSION 1.12.0-1~jessie
 
 RUN apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62 \
 	&& echo "deb http://nginx.org/packages/debian/ jessie nginx" >> /etc/apt/sources.list \
@@ -102,13 +102,29 @@ RUN echo 'Defaults !requiretty' >> /etc/sudoers; \
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log
 
-RUN mkdir -p /var/log/supervisor 
+RUN mkdir -p /var/log/supervisor
 RUN mkdir -p /home/qedu
 RUN mkdir -p /var/www
 
 ADD supervisord.conf /etc/supervisor/conf.d
 ADD nginx.conf /etc/nginx
 ADD php-fpm.conf /usr/local/etc/
+
+# Install New Relic daemon
+RUN apt-get update && \
+    apt-get -yq install wget && \
+    wget -O - https://download.newrelic.com/548C16BF.gpg | apt-key add - && \
+    echo "deb http://apt.newrelic.com/debian/ newrelic non-free" > /etc/apt/sources.list.d/newrelic.list
+
+RUN apt-get update && \
+    apt-get -yq install newrelic-php5
+
+# Setup environment variables for initializing New Relic
+ENV NR_INSTALL_SILENT 1
+ENV NR_INSTALL_KEY ba520964e3542ac9220b95d23b2bc7a590a3c73c
+ENV NR_APP_NAME "QEdu Provas API - Produção"
+
+RUN newrelic-install install
 
 RUN touch /var/run/nginx.pid && \
     chown -R qedu:qedu /var/www && \
